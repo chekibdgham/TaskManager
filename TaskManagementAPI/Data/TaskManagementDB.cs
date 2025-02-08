@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using TaskManagementAPI.Models;
+using TaskManagementAPI.Repositories.Interfaces;
 
 namespace TaskManagementAPI.Data;
 
@@ -8,6 +9,8 @@ public class TaskManagementDB : DbContext
 {
     public DbSet<TaskToDo> Tasks { get; set; }
     public DbSet<User> Users { get; set; }
+
+ 
     public TaskManagementDB(DbContextOptions<TaskManagementDB> options) : base(options) { }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -17,9 +20,11 @@ public class TaskManagementDB : DbContext
             new TaskToDo { Id = 3, Title = "Task 3", Description = "Description 3", Status = TStatus.Closed, AssignedUserId = 1 }
         );
         modelBuilder.Entity<User>().HasData(
-            new User { Id = 1, Username = "User1", Role = UserRole.Admin },
-            new User { Id = 2, Username = "User2", Role = UserRole.User }
+            new User { Id = 1, Username = "admin", Role = UserRole.Admin,Password="admin123" },
+            new User { Id = 2, Username = "User2", Role = UserRole.User,Password="2" }
         );
     }
+
+  
 }
 

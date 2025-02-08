@@ -6,12 +6,15 @@ using System;
 using System.Text;
 using TaskManagementAPI.Data;
 using TaskManagementAPI.Middelware;
+using TaskManagementAPI.Repositories;
+using TaskManagementAPI.Repositories.Interfaces;
 using TaskManagementAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
 var key = Encoding.UTF8.GetBytes(configuration["Jwt:Secret"] ?? throw new InvalidOperationException("JWT Secret is not configured."));
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -31,16 +34,18 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
-});
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"))
+    .AddPolicy("UserOnly", policy => policy.RequireRole("User"));
 
 builder.Services.AddDbContext<TaskManagementDB>(options =>
     options.UseInMemoryDatabase("TaskManagementDB"));
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<ITaskToDoRepository, TaskToDoRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<TaskToDoService>();
 builder.Services.AddHttpContextAccessor();

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TaskManagementAPI.Models;
 using TaskManagementAPI.Services;
@@ -6,6 +7,7 @@ using TaskManagementAPI.Services;
 namespace TaskManagementAPI.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin")]
     [ApiController]
     public class UsersController : ControllerBase
     {

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using TaskManagementAPI.Data;
 using TaskManagementAPI.Models;
 
@@ -18,7 +19,7 @@ namespace TaskManagementAPI.Services
 
         private int GetCurrentUserId()
         {
-            if (_httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value is string userIdStr && int.TryParse(userIdStr, out int userId))
+            if (_httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.Sid)?.Value is string userIdStr && int.TryParse(userIdStr, out int userId))
             {
                 return userId;
             }
@@ -69,23 +70,43 @@ namespace TaskManagementAPI.Services
         public void Update(TaskToDo task)
         {
             var existingTask = _unitOfWork.Tasks.GetById(task.Id);
+
+            if (existingTask is null)
+            {
+                throw new ArgumentException("Task not found", nameof(task.Id));
+            }
+
             if (GetCurrentUserRole() == UserRole.Admin)
             {
                 _unitOfWork.Tasks.Update(task);
                 _unitOfWork.Save();
             }
-            else if (existingTask.AssignedUserId == GetCurrentUserId())
-            {
-                existingTask.Status = task.Status;
-                _unitOfWork.Tasks.Update(existingTask);
-                _unitOfWork.Save();
-            }
+            
             else
             {
                 throw new UnauthorizedAccessException("You can only update the status of your assigned tasks.");
             }
         }
-
+        public void UpdateTaskStatus(int id, TStatus newTaskStatus)
+        {
+            var task = _unitOfWork.Tasks.GetById(id);
+            if(task is null)
+            {
+                throw new ArgumentException("Task not found", nameof(id));
+            }
+                
+            if (GetCurrentUserRole() == UserRole.Admin || task.AssignedUserId == GetCurrentUserId())
+            {
+                task.UpdateStatus(newTaskStatus);
+                _unitOfWork.Tasks.Update(task);
+                _unitOfWork.Save();
+            }
+            
+            else
+            {
+                throw new UnauthorizedAccessException("You can only update the status of your assigned tasks.");
+            }
+        }
         public void Delete(int id)
         {
             if (GetCurrentUserRole() == UserRole.Admin)

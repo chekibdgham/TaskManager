@@ -3,35 +3,35 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using TaskManagementAPI.Models;
+using TaskManagementAPI.Services;
 
 [Route("api/auth")]
 [ApiController]
 public class AuthController : ControllerBase
 {
     private readonly IConfiguration _config;
+    private readonly UserService _userService;
 
-    public AuthController(IConfiguration config)
+    public AuthController(IConfiguration config, UserService userService)
     {
         _config = config;
+        _userService = userService;
     }
 
     [HttpPost("login")]
-    public IActionResult Login([FromBody] LoginRequest model)
+    public async Task<IActionResult> Login([FromBody] LoginRequest model)
     {
-        // Mock user validation (replace with database check)
-        if (model.Username == "admin" && model.Password == "admin123")
+        var user = _userService.ValidateUserAsync(model);
+        if (user != null)
         {
-            return Ok(new { token = GenerateJwtToken("Admin") });
-        }
-        else if (model.Username == "user" && model.Password == "user123")
-        {
-            return Ok(new { token = GenerateJwtToken("User") });
+            return Ok(new { token = GenerateJwtToken(user) });
         }
 
         return Unauthorized("Invalid credentials");
     }
 
-    private string GenerateJwtToken(string role)
+    private string GenerateJwtToken(User user)
     {
         var secret = _config["Jwt:Secret"];
         if (string.IsNullOrEmpty(secret))
@@ -42,8 +42,9 @@ public class AuthController : ControllerBase
         var key = Encoding.UTF8.GetBytes(secret);
         var claims = new[]
         {
-            new Claim(ClaimTypes.Name, "testUser"),
-            new Claim(ClaimTypes.Role, role)
+            new Claim(ClaimTypes.NameIdentifier, user.Username),
+            new Claim(ClaimTypes.Sid, user.Id.ToString()),
+            new Claim(ClaimTypes.Role, user.Role.ToString())
         };
 
         var token = new JwtSecurityToken(

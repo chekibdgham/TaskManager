@@ -1,4 +1,5 @@
-﻿using TaskManagementAPI.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using TaskManagementAPI.Data;
 using TaskManagementAPI.Models;
 
 namespace TaskManagementAPI.Services
@@ -10,6 +11,15 @@ namespace TaskManagementAPI.Services
         public UserService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
+        }
+
+        public User? ValidateUserAsync(LoginRequest loginRequest)
+        {
+            var user = _unitOfWork.Users
+                .GetAll()
+                .FirstOrDefault(u => u.Username == loginRequest.Username && u.Password == loginRequest.Password);
+                 
+            return user;
         }
 
         public IEnumerable<User> GetAll() => _unitOfWork.Users.GetAll();

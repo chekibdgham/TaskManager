@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Components.Endpoints.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
@@ -9,6 +11,7 @@ using TaskManagementAPI.Middelware;
 using TaskManagementAPI.Repositories;
 using TaskManagementAPI.Repositories.Interfaces;
 using TaskManagementAPI.Services;
+using TaskManagementAPI.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -41,12 +44,14 @@ builder.Services.AddAuthorizationBuilder()
 builder.Services.AddDbContext<TaskManagementDB>(options =>
     options.UseInMemoryDatabase("TaskManagementDB"));
 
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IUnitOfWork>(sp=>sp.GetRequiredService<TaskManagementDB>());
 builder.Services.AddScoped<ITaskToDoRepository, TaskToDoRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IIdentityService, IdentityService>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 
 
-builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<TaskToDoService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers();

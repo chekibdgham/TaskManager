@@ -4,10 +4,10 @@ namespace TaskManagementAPI.Repositories.Interfaces
 {
     public interface ITaskToDoRepository
     {
-        IEnumerable<TaskToDo> GetAll();
-        TaskToDo GetById(int id);
-        void Add(TaskToDo task);
-        IEnumerable<TaskToDo> GetByUserId(int userId);
+        Task<List<TaskToDo>> GetAllAsync(CancellationToken cancellationToken=default!);
+        Task<TaskToDo> GetByIdAsync(int id, CancellationToken cancellationToken = default!);
+        Task AddAsync(TaskToDo task, CancellationToken cancellationToken = default);
+        Task<List<TaskToDo>> GetByUserIdAsync(int userId, CancellationToken cancellationToken = default!);
         void Update(TaskToDo task);
         void Delete(int id);
     }

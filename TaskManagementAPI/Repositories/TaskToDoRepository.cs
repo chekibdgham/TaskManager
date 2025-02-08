@@ -1,26 +1,37 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using TaskManagementAPI.Data;
 using TaskManagementAPI.Models;
 using TaskManagementAPI.Repositories.Interfaces;
 
 namespace TaskManagementAPI.Repositories
 {
-    public class TaskToDoRepository(TaskManagementDB context):ITaskToDoRepository
+    public class TaskToDoRepository(TaskManagementDB context): ITaskToDoRepository
     {
         private readonly TaskManagementDB _context = context;
-
-        public IEnumerable<TaskToDo> GetAll() => _context.Tasks.ToList();
-
-        public TaskToDo GetById(int id)
+        public async Task<List<TaskToDo>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            if (id <= 0) throw new ArgumentException("Id must be greater than zero", nameof(id));
-            var taskToDo = _context.Tasks.Find(id);
+            return await _context.Tasks.ToListAsync(cancellationToken);
+        }
+
+        public async Task<TaskToDo> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        {
+            
+            var taskToDo = await _context.Tasks.FindAsync(id, cancellationToken);
             return taskToDo ?? throw new ArgumentException("Task not found", nameof(id));
         }
 
-        public IEnumerable<TaskToDo> GetByUserId(int userId) => _context.Tasks.Where(t => t.AssignedUserId == userId).ToList();
-
-        public void Add(TaskToDo task) { _context.Tasks.Add(task); }
+        public async Task<List<TaskToDo>> GetByUserIdAsync(int userId, CancellationToken cancellationToken = default)
+        {
+            var res =await _context.Tasks.Where(t => t.AssignedUserId == userId).ToListAsync(cancellationToken);
+            return res;
+        }
+      
+         
+        public async Task AddAsync(TaskToDo task, CancellationToken cancellationToken = default)
+        {
+             await _context.Tasks.AddAsync(task,cancellationToken); 
+        }
 
         public void Update(TaskToDo task) { _context.Tasks.Update(task); }
 
@@ -29,5 +40,7 @@ namespace TaskManagementAPI.Repositories
             var task = _context.Tasks.Find(id);
             if (task != null) _context.Tasks.Remove(task);
         }
+
+       
     }
 }

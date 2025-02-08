@@ -1,65 +1,54 @@
 ﻿using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 using TaskManagementAPI.Data;
 using TaskManagementAPI.Models;
+using TaskManagementAPI.Repositories.Interfaces;
+using TaskManagementAPI.Services.Interfaces;
 
 namespace TaskManagementAPI.Services
 {
     public class TaskToDoService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ITaskToDoRepository _taskToDoRepository;
+        private readonly IIdentityService _identityService;
 
-        public TaskToDoService(IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
+        public TaskToDoService(IUnitOfWork unitOfWork,ITaskToDoRepository taskToDoRepository,IIdentityService identityService  )
         {
             _unitOfWork = unitOfWork;
-            _httpContextAccessor = httpContextAccessor;
+            _taskToDoRepository = taskToDoRepository;
+            _identityService = identityService;
         }
 
-        private int GetCurrentUserId()
-        {
-            if (_httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.Sid)?.Value is string userIdStr && int.TryParse(userIdStr, out int userId))
-            {
-                return userId;
-            }
-            throw new UnauthorizedAccessException("UserId is not set in the current context.");
-        }
+        
 
-        private UserRole GetCurrentUserRole()
+        public async Task<List<TaskToDo>> GetAll(CancellationToken cancellationToken)
         {
-            if (_httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value is string userRoleStr && Enum.TryParse(userRoleStr, out UserRole userRole))
+            if (_identityService.GetCurrentUserRole() == UserRole.Admin)
             {
-                return userRole;
-            }
-            throw new UnauthorizedAccessException("UserRole is not set in the current context.");
-        }
-
-        public IEnumerable<TaskToDo> GetAll()
-        {
-            if (GetCurrentUserRole() == UserRole.Admin)
-            {
-                return _unitOfWork.Tasks.GetAll();
+                return  await _taskToDoRepository.GetAllAsync(cancellationToken);
             }
             throw new UnauthorizedAccessException("Only Admin can view all tasks.");
         }
 
-        public TaskToDo GetById(int id)
+        public async Task<TaskToDo> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            var task = _unitOfWork.Tasks.GetById(id);
-            if (GetCurrentUserRole() == UserRole.Admin || task.AssignedUserId == GetCurrentUserId())
+            var task = await _taskToDoRepository.GetByIdAsync(id, cancellationToken);
+            if (_identityService.GetCurrentUserRole() == UserRole.Admin || task.AssignedUserId == _identityService.GetCurrentUserId())
             {
                 return task;
             }
             throw new UnauthorizedAccessException("You can only view tasks assigned to you.");
         }
 
-        public void Add(TaskToDo task)
+        public async Task Add(TaskToDo task,CancellationToken cancellationToken)
         {
-            if (GetCurrentUserRole() == UserRole.Admin)
+            if (_identityService.GetCurrentUserRole() == UserRole.Admin)
             {
-                _unitOfWork.Tasks.Add(task);
-                _unitOfWork.Save();
+                await _taskToDoRepository.AddAsync(task, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
             }
             else
             {
@@ -67,19 +56,20 @@ namespace TaskManagementAPI.Services
             }
         }
 
-        public void Update(TaskToDo task)
+        public async Task Update(TaskToDo task, CancellationToken cancellationToken)
         {
-            var existingTask = _unitOfWork.Tasks.GetById(task.Id);
+            var existingTask = await _taskToDoRepository.GetByIdAsync(task.Id);
 
             if (existingTask is null)
             {
                 throw new ArgumentException("Task not found", nameof(task.Id));
             }
 
-            if (GetCurrentUserRole() == UserRole.Admin)
+            if (_identityService.GetCurrentUserRole() == UserRole.Admin)
             {
-                _unitOfWork.Tasks.Update(task);
-                _unitOfWork.Save();
+                existingTask.Update(task);
+                _taskToDoRepository.Update(task);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
             }
             
             else
@@ -87,19 +77,21 @@ namespace TaskManagementAPI.Services
                 throw new UnauthorizedAccessException("You can only update the status of your assigned tasks.");
             }
         }
-        public void UpdateTaskStatus(int id, TStatus newTaskStatus)
+        public async Task UpdateTaskStatus(int id, TStatus newTaskStatus, CancellationToken cancellationToken)
         {
-            var task = _unitOfWork.Tasks.GetById(id);
-            if(task is null)
+           
+            var task = await _taskToDoRepository.GetByIdAsync(id);
+
+            if (task is null)
             {
                 throw new ArgumentException("Task not found", nameof(id));
             }
                 
-            if (GetCurrentUserRole() == UserRole.Admin || task.AssignedUserId == GetCurrentUserId())
+            if (_identityService.GetCurrentUserRole() == UserRole.Admin || task.AssignedUserId == _identityService.GetCurrentUserId())
             {
                 task.UpdateStatus(newTaskStatus);
-                _unitOfWork.Tasks.Update(task);
-                _unitOfWork.Save();
+                _taskToDoRepository.Update(task);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
             }
             
             else
@@ -107,12 +99,13 @@ namespace TaskManagementAPI.Services
                 throw new UnauthorizedAccessException("You can only update the status of your assigned tasks.");
             }
         }
-        public void Delete(int id)
+        public async Task Delete(int id, CancellationToken cancellationToken)
         {
-            if (GetCurrentUserRole() == UserRole.Admin)
+            if (_identityService.GetCurrentUserRole() == UserRole.Admin)
             {
-                _unitOfWork.Tasks.Delete(id);
-                _unitOfWork.Save();
+               
+                _taskToDoRepository.Delete(id);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
             }
             else
             {
@@ -120,6 +113,6 @@ namespace TaskManagementAPI.Services
             }
         }
 
-        public IEnumerable<TaskToDo> GetByUserId(int userId) => _unitOfWork.Tasks.GetByUserId(userId);
+        public async Task<List<TaskToDo>> GetByUserId(int userId, CancellationToken cancellationToken) => await _taskToDoRepository.GetByUserIdAsync(userId,cancellationToken);
     }
 }

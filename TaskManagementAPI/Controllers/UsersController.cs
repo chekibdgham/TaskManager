@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TaskManagementAPI.Models;
+using TaskManagementAPI.Repositories.Interfaces;
 using TaskManagementAPI.Services;
 
 namespace TaskManagementAPI.Controllers
@@ -9,39 +10,34 @@ namespace TaskManagementAPI.Controllers
     [Route("api/[controller]")]
     [Authorize(Roles = "Admin")]
     [ApiController]
-    public class UsersController : ControllerBase
-    {
-        private readonly UserService _userService;
-
-        public UsersController(UserService userService)
-        {
-            _userService = userService;
-        }
+    public class UsersController(IUserRepository userRepository) : ControllerBase
+    { 
+         
 
         [HttpGet]
-        public IActionResult GetAll() => Ok(_userService.GetAll());
+        public IActionResult GetAll() => Ok(userRepository.GetAll());
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id) => Ok(_userService.GetById(id));
+        public IActionResult GetById(int id) => Ok(userRepository.GetById(id));
 
         [HttpPost]
         public IActionResult Create(User user)
         {
-            _userService.Add(user);
+            userRepository.Add(user);
             return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
         }
 
         [HttpPut("{id}")]
         public IActionResult Update(int id, User user)
         {
-            _userService.Update(user);
+            userRepository.Update(user);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            _userService.Delete(id);
+            userRepository.Delete(id);
             return NoContent();
         }
     }

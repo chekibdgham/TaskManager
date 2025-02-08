@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Threading;
 using TaskManagementAPI.Models;
 using TaskManagementAPI.Repositories.Interfaces;
 using TaskManagementAPI.Services;
@@ -13,57 +14,55 @@ namespace TaskManagementAPI.Controllers
     public class TaskToDosController : ControllerBase
     {
         private readonly TaskToDoService _taskToDoService;
-        private readonly ITaskToDoRepository _taskToDoRepository;
 
-        public TaskToDosController(TaskToDoService taskToDoService, ITaskToDoRepository taskToDoRepository)
+        public TaskToDosController(TaskToDoService taskToDoService)
         {
             _taskToDoService = taskToDoService;
-            _taskToDoRepository = taskToDoRepository;
         }
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Get all tasks")]
-        public IActionResult GetAllTasks() => Ok(_taskToDoRepository.GetAll());
+        public IActionResult GetAllTasks(CancellationToken cancellationToken) => Ok(_taskToDoService.GetAll(cancellationToken));
 
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin,User")]
         [SwaggerOperation(Summary = "Get task by ID")]
-        public IActionResult GetById(int id) => Ok(_taskToDoService.GetById(id));
+        public IActionResult GetById(int id, CancellationToken cancellationToken) => Ok(_taskToDoService.GetByIdAsync(id,cancellationToken));
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Create a new task")]
-        public IActionResult Create(TaskToDo taskToDo)
+        public async Task<IActionResult> Create(TaskToDo taskToDo, CancellationToken cancellationToken)
         {
-            _taskToDoService.Add(taskToDo);
+            await _taskToDoService.Add(taskToDo, cancellationToken);
             return CreatedAtAction(nameof(GetById), new { id = taskToDo.Id }, taskToDo);
         }
 
         [HttpPut]
         [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Update an existing task")]
-        public IActionResult Update(TaskToDo taskToDo)
+        public async Task<IActionResult> Update(TaskToDo taskToDo, CancellationToken cancellationToken)
         {
-            _taskToDoService.Update(taskToDo);
+            await _taskToDoService.Update(taskToDo, cancellationToken);
             return NoContent();
         }
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,User")]
         [SwaggerOperation(Summary = "Update task status")]
-        public IActionResult UpdateTaskStatus(int id, TStatus newTaskStatus)
+        public async Task<IActionResult> UpdateTaskStatus(int id, TStatus newTaskStatus, CancellationToken cancellationToken)
         {
-            _taskToDoService.UpdateTaskStatus(id, newTaskStatus);
+            await _taskToDoService.UpdateTaskStatus(id, newTaskStatus, cancellationToken);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Delete a task")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
-            _taskToDoService.Delete(id);
+            await _taskToDoService.Delete(id, cancellationToken);
             return NoContent();
         }
     }

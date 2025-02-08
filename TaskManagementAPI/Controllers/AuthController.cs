@@ -5,57 +5,34 @@ using System.Security.Claims;
 using System.Text;
 using TaskManagementAPI.Models;
 using TaskManagementAPI.Services;
+using TaskManagementAPI.Services.Interfaces;
 
 [Route("api/auth")]
 [ApiController]
 public class AuthController : ControllerBase
 {
     private readonly IConfiguration _config;
-    private readonly UserService _userService;
+    private readonly IAuthenticationService _authService;
 
-    public AuthController(IConfiguration config, UserService userService)
+    public AuthController(IConfiguration config, IAuthenticationService authService)
     {
         _config = config;
-        _userService = userService;
+        _authService = authService;
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest model)
     {
-        var user = _userService.ValidateUserAsync(model);
-        if (user != null)
+        var res = _authService.AuthenticateUserAsync(model);
+        if (res != null)
         {
-            return Ok(new { token = GenerateJwtToken(user) });
+            return Ok(new { token = res });
         }
 
         return Unauthorized("Invalid credentials");
     }
 
-    private string GenerateJwtToken(User user)
-    {
-        var secret = _config["Jwt:Secret"];
-        if (string.IsNullOrEmpty(secret))
-        {
-            throw new InvalidOperationException("JWT Secret is not configured.");
-        }
-
-        var key = Encoding.UTF8.GetBytes(secret);
-        var claims = new[]
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Username),
-            new Claim(ClaimTypes.Sid, user.Id.ToString()),
-            new Claim(ClaimTypes.Role, user.Role.ToString())
-        };
-
-        var token = new JwtSecurityToken(
-            claims: claims,
-            expires: DateTime.UtcNow.AddHours(1),
-            signingCredentials: new SigningCredentials(
-                new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
+   
 }
 
 public class LoginRequest

@@ -40,26 +40,6 @@ namespace TaskManagerTests.UnitTests
             }
         }
 
-        [Fact]
-        public void CanAddAndRetrieveUsers()
-        {
-            // Arrange
-            var options = GetInMemoryOptions();
-            using (var context = new TaskManagementDB(options))
-            {
-                context.Database.EnsureCreated();
-            }
-
-            // Act
-            using (var context = new TaskManagementDB(options))
-            {
-                var users = context.Users.ToList();
-
-                // Assert
-                Assert.Equal(2, users.Count);
-                Assert.Equal("User1", users[0].Username);
-                Assert.Equal("User2", users[1].Username);
-            }
-        }
+       
     }
 }

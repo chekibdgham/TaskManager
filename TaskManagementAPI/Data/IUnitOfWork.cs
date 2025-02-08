@@ -2,10 +2,9 @@
 
 namespace TaskManagementAPI.Data
 {
-    public interface IUnitOfWork : IDisposable
+    public interface IUnitOfWork  
     {
-        IUserRepository Users { get; }
-        ITaskToDoRepository Tasks { get; }
-        int Save();
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken=default);
+        
     }
 }

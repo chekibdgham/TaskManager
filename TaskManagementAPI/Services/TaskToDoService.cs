@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Security.Claims;
 using TaskManagementAPI.Data;
 using TaskManagementAPI.Models;
 
@@ -17,7 +18,7 @@ namespace TaskManagementAPI.Services
 
         private int GetCurrentUserId()
         {
-            if (_httpContextAccessor?.HttpContext?.Items["UserId"] is int userId)
+            if (_httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value is string userIdStr && int.TryParse(userIdStr, out int userId))
             {
                 return userId;
             }
@@ -26,7 +27,7 @@ namespace TaskManagementAPI.Services
 
         private UserRole GetCurrentUserRole()
         {
-            if (_httpContextAccessor?.HttpContext?.Items["UserRole"] is UserRole userRole)
+            if (_httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value is string userRoleStr && Enum.TryParse(userRoleStr, out UserRole userRole))
             {
                 return userRole;
             }

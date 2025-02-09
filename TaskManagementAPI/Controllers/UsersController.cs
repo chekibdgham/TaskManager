@@ -21,14 +21,14 @@ namespace TaskManagementAPI.Controllers
         public IActionResult GetById(int id) => Ok(userRepository.GetById(id));
 
         [HttpPost]
-        public IActionResult Create(User user)
+        public IActionResult Create(DtoUser user)
         {
             userRepository.Add(user);
-            return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+            return CreatedAtAction(nameof(GetById), new { id = user.UserId }, user);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, User user)
+        public IActionResult Update(int id, DtoUser user)
         {
             userRepository.Update(user);
             return NoContent();

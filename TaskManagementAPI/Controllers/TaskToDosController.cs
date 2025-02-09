@@ -28,7 +28,8 @@ namespace TaskManagementAPI.Controllers
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin,User")]
         [SwaggerOperation(Summary = "Get task by ID")]
-        public IActionResult GetById(int id, CancellationToken cancellationToken) => Ok(_taskToDoService.GetByIdAsync(id,cancellationToken));
+        public IActionResult GetById(int id, CancellationToken cancellationToken) => 
+            Ok(_taskToDoService.GetByIdAsync(id,cancellationToken));
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
@@ -39,7 +40,7 @@ namespace TaskManagementAPI.Controllers
             return CreatedAtAction(nameof(GetById), new { id = taskToDo.Id }, taskToDo);
         }
 
-        [HttpPut]
+        [HttpPut("UpdateTask")]
         [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Update an existing task")]
         public async Task<IActionResult> Update(TaskToDo taskToDo, CancellationToken cancellationToken)
@@ -48,7 +49,7 @@ namespace TaskManagementAPI.Controllers
             return NoContent();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("UpdateStatusTask/{id}")]
         [Authorize(Roles = "Admin,User")]
         [SwaggerOperation(Summary = "Update task status")]
         public async Task<IActionResult> UpdateTaskStatus(int id, TStatus newTaskStatus, CancellationToken cancellationToken)

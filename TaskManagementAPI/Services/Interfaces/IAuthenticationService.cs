@@ -1,4 +1,5 @@
-﻿using TaskManagementAPI.Data;
+﻿using TaskManagementAPI.Controllers;
+using TaskManagementAPI.Data;
 
 namespace TaskManagementAPI.Services.Interfaces
 {

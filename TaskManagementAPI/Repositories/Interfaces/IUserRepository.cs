@@ -4,11 +4,11 @@ namespace TaskManagementAPI.Repositories.Interfaces
 {
     public interface IUserRepository
     {
-        IEnumerable<User> GetAll();
-        User GetById(int id);
+        IEnumerable<DtoUser> GetAll();
+        DtoUser GetById(int id);
         User GetByName(string name);
-        void Add(User user);
-        void Update(User user);
+        void Add(DtoUser user);
+        void Update(DtoUser user);
         void Delete(int id);
     }
 }

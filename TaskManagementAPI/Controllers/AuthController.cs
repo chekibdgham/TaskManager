@@ -7,21 +7,17 @@ using TaskManagementAPI.Models;
 using TaskManagementAPI.Services;
 using TaskManagementAPI.Services.Interfaces;
 
+namespace TaskManagementAPI.Controllers;
+
 [Route("api/auth")]
 [ApiController]
-public class AuthController : ControllerBase
+public class AuthController(IConfiguration config, IAuthenticationService authService) : ControllerBase
 {
-    private readonly IConfiguration _config;
-    private readonly IAuthenticationService _authService;
-
-    public AuthController(IConfiguration config, IAuthenticationService authService)
-    {
-        _config = config;
-        _authService = authService;
-    }
+    private readonly IConfiguration _config = config;
+    private readonly IAuthenticationService _authService = authService;
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest model)
+    public IActionResult Login([FromBody] LoginRequest model)
     {
         var res = _authService.AuthenticateUserAsync(model);
         if (res != null)
@@ -32,12 +28,12 @@ public class AuthController : ControllerBase
         return Unauthorized("Invalid credentials");
     }
 
-   
+
 }
 
 public class LoginRequest
 {
-    public string Username { get; set; }
-    public string Password { get; set; }
+    public string Username { get; set; }= string.Empty;
+    public string Password { get; set; }= string.Empty;
 }
 

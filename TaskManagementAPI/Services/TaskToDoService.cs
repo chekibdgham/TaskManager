@@ -33,15 +33,27 @@ namespace TaskManagementAPI.Services
             throw new UnauthorizedAccessException("Only Admin can view all tasks.");
         }
 
+
         public async Task<TaskToDo> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
             var task = await _taskToDoRepository.GetByIdAsync(id, cancellationToken);
-            if (_identityService.GetCurrentUserRole() == UserRole.Admin || task.AssignedUserId == _identityService.GetCurrentUserId())
+
+            if (task == null)
+            {
+                throw new KeyNotFoundException($"Task with ID {id} not found.");
+            }
+
+            var currentUserId = _identityService.GetCurrentUserId();
+            var currentUserRole = _identityService.GetCurrentUserRole();
+
+            if (currentUserRole == UserRole.Admin || task.AssignedUserId == currentUserId)
             {
                 return task;
             }
-            throw new UnauthorizedAccessException("You can only view tasks assigned to you.");
+
+            throw new UnauthorizedAccessException("Access denied. You can only view tasks assigned to you.");
         }
+
 
         public async Task Add(TaskToDo task,CancellationToken cancellationToken)
         {
@@ -74,19 +86,14 @@ namespace TaskManagementAPI.Services
             
             else
             {
-                throw new UnauthorizedAccessException("You can only update the status of your assigned tasks.");
+                throw new UnauthorizedAccessException("Task not allowed.");
             }
         }
         public async Task UpdateTaskStatus(int id, TStatus newTaskStatus, CancellationToken cancellationToken)
         {
            
-            var task = await _taskToDoRepository.GetByIdAsync(id);
-
-            if (task is null)
-            {
-                throw new ArgumentException("Task not found", nameof(id));
-            }
-                
+            var task = await _taskToDoRepository.GetByIdAsync(id) ?? throw new ArgumentException("Task not found", nameof(id));
+            
             if (_identityService.GetCurrentUserRole() == UserRole.Admin || task.AssignedUserId == _identityService.GetCurrentUserId())
             {
                 task.UpdateStatus(newTaskStatus);
@@ -103,7 +110,6 @@ namespace TaskManagementAPI.Services
         {
             if (_identityService.GetCurrentUserRole() == UserRole.Admin)
             {
-               
                 _taskToDoRepository.Delete(id);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
             }

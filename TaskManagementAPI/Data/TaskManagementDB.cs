@@ -9,27 +9,27 @@ public class TaskManagementDB(DbContextOptions<TaskManagementDB> options) : DbCo
 {
     public DbSet<TaskToDo> Tasks { get; set; }
     public DbSet<User> Users { get; set; }
-
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ConfigureTaskToDoEntity(modelBuilder);
         ConfigureUserEntity(modelBuilder);
-
+    
         SeedDatabase(modelBuilder);
 
         base.OnModelCreating(modelBuilder);
-    }
+        }
 
     private static void SeedDatabase(ModelBuilder modelBuilder)
-    {
+        {
         modelBuilder.Entity<TaskToDo>().HasData(
-            new TaskToDo { Id = 1, Title = "Task 1", Description = "Description 1", Status = TStatus.Open, AssignedUserId = 1 },
-            new TaskToDo { Id = 2, Title = "Task 2", Description = "Description 2", Status = TStatus.InProgress, AssignedUserId = 2 },
-            new TaskToDo { Id = 3, Title = "Task 3", Description = "Description 3", Status = TStatus.Closed, AssignedUserId = 1 }
-        );
+                new TaskToDo { Id = 1, Title = "Task 1", Description = "Description 1", Status = TStatus.Open, AssignedUserId = 1 },
+                new TaskToDo { Id = 2, Title = "Task 2", Description = "Description 2", Status = TStatus.InProgress, AssignedUserId = 2 },
+                new TaskToDo { Id = 3, Title = "Task 3", Description = "Description 3", Status = TStatus.Closed, AssignedUserId = 1 }
+            );
         modelBuilder.Entity<User>().HasData(
             new User { Id = 1, Username = "admin", Role = UserRole.Admin, Password = "admin123" },
-            new User { Id = 2, Username = "User2", Role = UserRole.User, Password = "2" }
+            new User { Id = 2, Username = "user2", Role = UserRole.User, Password = "user2" }
         );
     }
 
@@ -59,11 +59,7 @@ public class TaskManagementDB(DbContextOptions<TaskManagementDB> options) : DbCo
             )
             .IsRequired();
         modelBuilder.Entity<TaskToDo>().Property(t => t.AssignedUserId).IsRequired();
-        modelBuilder.Entity<TaskToDo>()
-            .HasOne<User>()
-            .WithMany()
-            .HasForeignKey(t => t.AssignedUserId)
-            .OnDelete(DeleteBehavior.Restrict);
+        
     }
 }
 

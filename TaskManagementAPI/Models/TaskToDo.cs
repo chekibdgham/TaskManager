@@ -1,20 +1,29 @@
 ﻿
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace TaskManagementAPI.Models
 {
     public class TaskToDo
     {
+        [Key]
         public int Id { get; set; }
-        public string Title { get; set; }= string.Empty;
+        [Required(ErrorMessage = "Title field is required")]
+        public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public TStatus Status { get;  set; } // "Open", "In Progress", "Closed"
+        [Required]
+        public TStatus Status { get; set; } // "Open", "In Progress", "Closed"
 
-         
+        //[ForeignKey("AssignedUser")]
         public int AssignedUserId { get; set; }
 
-        
-        public void UpdateStatus(TStatus status)=>Status=status;
+        //public virtual User? AssignedUser { get; set; } = new User();
+
+
+        // Method to update only the status of the task
+        public void UpdateStatus(TStatus status) => Status = status;
 
         internal void Update(TaskToDo task)
         {
@@ -25,6 +34,7 @@ namespace TaskManagementAPI.Models
         }
     }
 
+    // Enum for Task Status
     public enum TStatus
     {
         Open=0,

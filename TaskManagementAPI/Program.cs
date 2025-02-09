@@ -1,5 +1,9 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Endpoints.Infrastructure;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -7,7 +11,8 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Text;
 using TaskManagementAPI.Data;
-using TaskManagementAPI.Middelware;
+//using TaskManagementAPI.Middelware;
+using TaskManagementAPI.Models;
 using TaskManagementAPI.Repositories;
 using TaskManagementAPI.Repositories.Interfaces;
 using TaskManagementAPI.Services;
@@ -44,17 +49,21 @@ builder.Services.AddAuthorizationBuilder()
 builder.Services.AddDbContext<TaskManagementDB>(options =>
     options.UseInMemoryDatabase("TaskManagementDB"));
 
+builder.Services.AddScoped<IValidator<DtoUser>, DtoUserValidator>();
 builder.Services.AddScoped<IUnitOfWork>(sp=>sp.GetRequiredService<TaskManagementDB>());
 builder.Services.AddScoped<ITaskToDoRepository, TaskToDoRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
-
+builder.Services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters();
 builder.Services.AddScoped<TaskToDoService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers();
+
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen( options =>
 {
@@ -97,6 +106,31 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseMiddleware<RoleBasedAccessControlMiddleware>();
+//app.UseMiddleware<RoleBasedAccessControlMiddleware>();
 app.MapControllers();
+app.UseExceptionHandler(appBuilder =>
+{
+    appBuilder.Run(async context =>
+    {
+        context.Response.ContentType = "application/json";
+        var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+
+        if (exception is UnauthorizedAccessException)
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            await context.Response.WriteAsync("{\"message\": \"Access denied. You are not authorized to view this task.\"}");
+        }
+        else if (exception is KeyNotFoundException)
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            await context.Response.WriteAsync("{\"message\": \"" + exception.Message + "\"}");
+        }
+        else
+        {
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            await context.Response.WriteAsync("{\"message\": \"An unexpected error occurred.\"}");
+        }
+    });
+});
+
 app.Run();

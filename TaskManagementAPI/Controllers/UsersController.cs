@@ -33,7 +33,7 @@ namespace TaskManagementAPI.Controllers
         public IActionResult Create(DtoUser user)
         {
             _logger.LogInformation("Creating user: {User}", user);
-            userRepository.Add(user);
+            _userRepository.Add(user);
             return CreatedAtAction(nameof(GetById), new { id = user.UserId }, user);
         }
 
@@ -41,7 +41,7 @@ namespace TaskManagementAPI.Controllers
         public IActionResult Update(DtoUser user)
         {
             _logger.LogInformation("Updating user: {User}", user);
-            userRepository.Update(user);
+            _userRepository.Update(user);
             return NoContent();
         }
 
@@ -49,7 +49,7 @@ namespace TaskManagementAPI.Controllers
         public IActionResult Delete(int id)
         {
             _logger.LogInformation("Deleting user by ID: {Id}", id);
-            userRepository.Delete(id);
+            _userRepository.Delete(id);
             return NoContent();
         }
     }

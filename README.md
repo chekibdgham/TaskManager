@@ -6,8 +6,12 @@ TaskManager is a .NET 8 web API designed to manage tasks and users efficiently. 
 
 - **Task Management**: Create, update, delete, and retrieve tasks.
 - **User Management**: Manage user information and authentication.
+- **Task Assignment**: Assign tasks to users.
 - **Authentication & Authorization**: Secure the API using JWT Bearer authentication with role-based access control.
-- **Validation**: Uses FluentValidation for request model validation.
+- **Validation**: Uses FluentValidation for request model validation, Data Annotation, Fluent API.
+- **Unit Testing**: Includes unit tests for controllers, services, and repositories.
+- **Logging**: Logs information, warnings, and errors using Built-in Logger.
+- **DTOs**: Data Transfer Objects (DTOs) are used to transfer data between the API and the client(for the User Model).
 - **In-Memory Database**: Utilizes Entity Framework Core In-Memory database for development and testing.
 - **API Documentation**: Integrated with Swagger for easy API exploration and testing.
 
@@ -19,6 +23,7 @@ TaskManager is a .NET 8 web API designed to manage tasks and users efficiently. 
 - **Microsoft.EntityFrameworkCore.InMemory**: For an in-memory database (useful for development and testing).
 - **Swashbuckle.AspNetCore**: For Swagger API documentation.
 - **Swashbuckle.AspNetCore.Annotations**: For adding Swagger annotations.
+- **xUnit**: For unit testing.
 
 ## Project Structure
 
@@ -28,13 +33,23 @@ The project follows a structured approach but does not fully adhere to Clean Arc
 - **Data**: Contains database context (`TaskManagementDB.cs`) and Unit of Work pattern (`IUnitOfWork.cs`).
 - **Models**: Defines data transfer objects (DTOs) and validation (`DtoUser.cs`, `DtoUserValidator.cs`, `TaskToDo.cs`, `User.cs`).
 - **Repositories**: Implements data access logic (`TaskToDoRepository.cs`, `UserRepository.cs`).
-- **Services**: Contains application configurations and settings (`appsettings.json`).
+- **Services**: Contains application configurations and settings (`appsettings.json`.`AuthenticationService.cs`,`IdentityService.cs`,`JwtService.cs`,`TaskToDoService.cs`).
+
+## Roles and Permissions
+-- **Role-based Access Control**:
+	Admins can create, update, and delete all tasks.
+	Users can only update the status of their assigned tasks.
+	Users can only retrieve tasks assigned to them.
+    Only admins can list all tasks.
+
+## Database seed
+	- The database is seeded with two users and three tasks.
 
 ## Architecture Diagram
 
 Below is a visual representation of the application's architecture:
 
-![TaskManager Architecture](taskmanager_architecture.png)
+![TaskManager Architecture](User_Task_Digarm.png)
 
 ## Getting Started
 

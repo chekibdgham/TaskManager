@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
-using TaskManagementAPI.Models;
+using TaskManagementAPI.Models.TaskToDo;
+using TaskManagementAPI.Models.User;
 using TaskManagementAPI.Repositories.Interfaces;
 
 namespace TaskManagementAPI.Data;

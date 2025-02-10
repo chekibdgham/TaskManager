@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using TaskManagementAPI.Data;
-using TaskManagementAPI.Models;
 using TaskManagementAPI.Repositories;
 using TaskManagementAPI.Repositories.Interfaces;
 using FluentValidation;
@@ -9,6 +8,7 @@ using FluentValidation.Results;
 using Xunit;
 using System.Collections.Generic;
 using System.Linq;
+using TaskManagementAPI.Models.User;
 
 namespace TaskManagerTests.UnitTests;
 public class UserRepositoryTests

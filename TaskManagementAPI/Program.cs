@@ -11,12 +11,14 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Text;
 using TaskManagementAPI.Data;
+using TaskManagementAPI.Models.User;
+
 //using TaskManagementAPI.Middelware;
-using TaskManagementAPI.Models;
 using TaskManagementAPI.Repositories;
 using TaskManagementAPI.Repositories.Interfaces;
 using TaskManagementAPI.Services;
 using TaskManagementAPI.Services.Interfaces;
+using TaskManagementAPI.Services.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -87,7 +89,7 @@ builder.Services.AddSwaggerGen( options =>
         { jwtSecurityScheme, Array.Empty<string>() }
     });
 });
-
+builder.Logging.ClearProviders().AddConfiguration(builder.Configuration.GetSection("Logging")).AddConsole().AddDebug();
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -106,31 +108,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-//app.UseMiddleware<RoleBasedAccessControlMiddleware>();
 app.MapControllers();
-app.UseExceptionHandler(appBuilder =>
-{
-    appBuilder.Run(async context =>
-    {
-        context.Response.ContentType = "application/json";
-        var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
-
-        if (exception is UnauthorizedAccessException)
-        {
-            context.Response.StatusCode = StatusCodes.Status403Forbidden;
-            await context.Response.WriteAsync("{\"message\": \"Access denied. You are not authorized to view this task.\"}");
-        }
-        else if (exception is KeyNotFoundException)
-        {
-            context.Response.StatusCode = StatusCodes.Status404NotFound;
-            await context.Response.WriteAsync("{\"message\": \"" + exception.Message + "\"}");
-        }
-        else
-        {
-            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            await context.Response.WriteAsync("{\"message\": \"An unexpected error occurred.\"}");
-        }
-    });
-});
 
 app.Run();

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
-namespace TaskManagementAPI.Models
+namespace TaskManagementAPI.Models.TaskToDo
 {
     public class TaskToDo
     {
@@ -37,8 +37,8 @@ namespace TaskManagementAPI.Models
     // Enum for Task Status
     public enum TStatus
     {
-        Open=0,
-        InProgress=1,
-        Closed=2
+        Open = 0,
+        InProgress = 1,
+        Closed = 2
     }
 }

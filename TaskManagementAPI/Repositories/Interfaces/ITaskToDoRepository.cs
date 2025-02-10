@@ -1,4 +1,4 @@
-﻿using TaskManagementAPI.Models;
+﻿using TaskManagementAPI.Models.TaskToDo;
 
 namespace TaskManagementAPI.Repositories.Interfaces
 {
@@ -10,5 +10,6 @@ namespace TaskManagementAPI.Repositories.Interfaces
         Task<List<TaskToDo>> GetByUserIdAsync(int userId, CancellationToken cancellationToken = default!);
         void Update(TaskToDo task);
         void Delete(int id);
+        void Detach(TaskToDo task);
     }
 }

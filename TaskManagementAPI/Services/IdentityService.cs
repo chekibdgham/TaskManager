@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-using TaskManagementAPI.Models;
+using TaskManagementAPI.Models.User;
 using TaskManagementAPI.Services.Interfaces;
 
 namespace TaskManagementAPI.Services

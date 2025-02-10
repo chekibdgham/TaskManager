@@ -1,5 +1,5 @@
 using FluentValidation;
-using TaskManagementAPI.Models;
+using TaskManagementAPI.Models.User;
 
 public class DtoUserValidator : AbstractValidator<DtoUser>
 {

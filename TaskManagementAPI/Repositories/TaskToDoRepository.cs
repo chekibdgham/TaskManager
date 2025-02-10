@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using TaskManagementAPI.Data;
-using TaskManagementAPI.Models;
+using TaskManagementAPI.Models.TaskToDo;
 using TaskManagementAPI.Repositories.Interfaces;
 
 namespace TaskManagementAPI.Repositories
@@ -40,7 +40,11 @@ namespace TaskManagementAPI.Repositories
             var task = _context.Tasks.Find(id);
             if (task != null) _context.Tasks.Remove(task);
         }
+        public void Detach(TaskToDo task)
+        {
+            _context.Entry(task).State = EntityState.Detached;
+        }
 
-       
+
     }
 }

@@ -1,4 +1,4 @@
-﻿using TaskManagementAPI.Models;
+﻿using TaskManagementAPI.Models.User;
 
 namespace TaskManagementAPI.Services.Interfaces
 {

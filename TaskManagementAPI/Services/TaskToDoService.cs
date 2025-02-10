@@ -3,7 +3,8 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using TaskManagementAPI.Data;
-using TaskManagementAPI.Models;
+using TaskManagementAPI.Models.TaskToDo;
+using TaskManagementAPI.Models.User;
 using TaskManagementAPI.Repositories.Interfaces;
 using TaskManagementAPI.Services.Interfaces;
 
@@ -79,6 +80,7 @@ namespace TaskManagementAPI.Services
 
             if (_identityService.GetCurrentUserRole() == UserRole.Admin)
             {
+                _taskToDoRepository.Detach(existingTask); // Detach the existing entity
                 existingTask.Update(task);
                 _taskToDoRepository.Update(task);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -96,6 +98,7 @@ namespace TaskManagementAPI.Services
             
             if (_identityService.GetCurrentUserRole() == UserRole.Admin || task.AssignedUserId == _identityService.GetCurrentUserId())
             {
+                _taskToDoRepository.Detach(task);
                 task.UpdateStatus(newTaskStatus);
                 _taskToDoRepository.Update(task);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TaskManagementAPI.Data;
-using TaskManagementAPI.Models;
+using TaskManagementAPI.Models.TaskToDo;
+using TaskManagementAPI.Models.User;
 using Xunit;
 
 namespace TaskManagerTests.IntegrationTests;

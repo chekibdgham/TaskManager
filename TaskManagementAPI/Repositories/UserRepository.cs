@@ -1,10 +1,10 @@
 ﻿using System;
-using TaskManagementAPI.Models;
 using TaskManagementAPI.Data;
 using TaskManagementAPI.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
 using FluentValidation.Results;
+using TaskManagementAPI.Models.User;
 
 namespace TaskManagementAPI.Repositories
 {
@@ -59,7 +59,9 @@ namespace TaskManagementAPI.Repositories
             _context.Users.Add(new User
             {
                 Username = user.UserName,
-                Role = Enum.Parse<UserRole>(user.Role)
+                Role = Enum.Parse<UserRole>(user.Role),
+                Password = "123456"
+                
             });
             _context.SaveChanges(); 
         }
@@ -69,6 +71,7 @@ namespace TaskManagementAPI.Repositories
             var userupdated = _context.Users.Find(user.UserId) ?? throw new ArgumentException("User not found", nameof(user.UserId));
             userupdated.Username = user.UserName;
             userupdated.Role = Enum.Parse<UserRole>(user.Role);
+            userupdated.Password = "123456"; // We don't manage Password in this example, we hard the password just for Test
             _context.Users.Update(userupdated); 
             _context.SaveChanges(); 
         }

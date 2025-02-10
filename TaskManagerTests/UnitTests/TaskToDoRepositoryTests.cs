@@ -3,7 +3,7 @@ using Moq;
 using System.Threading;
 using System.Threading.Tasks;
 using TaskManagementAPI.Data;
-using TaskManagementAPI.Models;
+using TaskManagementAPI.Models.TaskToDo;
 using TaskManagementAPI.Repositories;
 using TaskManagementAPI.Repositories.Interfaces;
 using Xunit;

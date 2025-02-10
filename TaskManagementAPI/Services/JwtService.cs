@@ -3,7 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using TaskManagementAPI.Models;
+using TaskManagementAPI.Models.User;
 using TaskManagementAPI.Services.Interfaces;
 
 namespace TaskManagementAPI.Services
